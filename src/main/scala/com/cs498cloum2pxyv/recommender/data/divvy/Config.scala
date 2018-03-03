@@ -1,13 +1,11 @@
-package com.cs498cloum2pxyv.recommender.util
+package com.cs498cloum2pxyv.recommender.data.divvy
 
 import java.io.File
 import java.net.URL
 
-import scala.sys.process._
+object Config {
 
-object DivvyDataDownloader {
-
-  val dataUrls = List(
+  val urls = List(
     new URL("https://s3.amazonaws.com/divvy-data/tripdata/Divvy_Stations_Trips_2013.zip"),
     new URL("https://s3.amazonaws.com/divvy-data/tripdata/Divvy_Stations_Trips_2014_Q1Q2.zip"),
     new URL("https://s3.amazonaws.com/divvy-data/tripdata/Divvy_Stations_Trips_2014_Q3Q4.zip"),
@@ -19,22 +17,15 @@ object DivvyDataDownloader {
     new URL("https://s3.amazonaws.com/divvy-data/tripdata/Divvy_Trips_2017_Q3Q4.zip")
   )
 
-  def downloadFiles(): Unit = {
-    dataUrls
-      .map(url => {
-        (url, new File("src/main/resources/" + url.getPath.split("/").last))
-      })
-      .filter(!_._2.exists)
-      .foreach(urlFile => {
-        val url = urlFile._1
-        val file = urlFile._2
-        file.createNewFile()
-        url #> file !!
-      })
-  }
+  val relativeZipPaths: Seq[String] = urls.map(url => s"src/main/resources/${url.getPath.split("/").last}")
+  val absoluteZipPaths: Seq[String] = relativeZipPaths.map(new File(_).getAbsolutePath)
+  val relativeExtractPaths: Seq[String] = relativeZipPaths.map(p => {
+    val ap = new File(p).getPath
+    ap.substring(0, ap.indexOf("."))
+  })
+  val absoluteExtractPaths: Seq[String] = relativeExtractPaths.map(new File(_).getAbsolutePath)
 
-  def main(args: Array[String]): Unit = {
-    downloadFiles()
-  }
-
+  val urlsAndRelativeZipPaths: Seq[(URL, String)] = urls.zip(relativeZipPaths)
+  val urlsAndAbsoluteZipPaths: Seq[(URL, String)] = urls.zip(absoluteZipPaths)
+  val absoluteZipAndExtractPaths: Seq[(String, String)] = absoluteZipPaths.zip(absoluteExtractPaths)
 }
