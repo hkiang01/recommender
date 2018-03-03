@@ -17,6 +17,54 @@ object Config {
     new URL("https://s3.amazonaws.com/divvy-data/tripdata/Divvy_Trips_2017_Q3Q4.zip")
   )
 
+  val stationFields: Array[String] = Array(
+    "id",
+    "name",
+    "latitude",
+    "longitude",
+    "dpcapacity",
+    "landmark",
+    "online date"
+  )
+  case class Station(
+      id: String,
+      name: String,
+      latitude: String,
+      longitude: String,
+      dpcapacity: String,
+      landmark: String,
+      online_date: String
+  )
+
+  val tripFields: Array[String] = Array(
+      "trip_id",
+      "starttime",
+      "stoptime",
+      "bikeid",
+      "tripduration",
+      "from_station_id",
+      "from_station_name",
+      "to_station_id",
+      "to_station_name",
+      "usertype",
+      "gender",
+      "birthyear"
+  )
+  case class Trip(
+      trip_id: String,
+      starttime: String,
+      stoptime: String,
+      bikeid: String,
+      tripduration: String,
+      from_station_id: String,
+      from_station_name: String,
+      to_station_id: String,
+      to_station_name: String,
+      usertype: String,
+      gender: String,
+      birthyear: String
+  )
+
   val relativeZipPaths: Seq[String] = urls.map(url => s"src/main/resources/${url.getPath.split("/").last}")
   val absoluteZipPaths: Seq[String] = relativeZipPaths.map(new File(_).getAbsolutePath)
   val relativeExtractPaths: Seq[String] = relativeZipPaths.map(p => {
