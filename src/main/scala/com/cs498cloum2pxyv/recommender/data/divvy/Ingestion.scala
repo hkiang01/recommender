@@ -95,6 +95,8 @@ object Ingestion {
   }
 
   def main(args: Array[String]): Unit = {
+    downloadFiles()
+    unzipFiles()
     val env = ApplicationExecutionEnvironment.env
     println(s"${stationData(env).count()} stations")
     println(s"${tripData(env).count()} trips")
