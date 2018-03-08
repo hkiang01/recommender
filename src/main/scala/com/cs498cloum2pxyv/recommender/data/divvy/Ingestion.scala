@@ -95,8 +95,9 @@ object Ingestion {
   }
 
   def main(args: Array[String]): Unit = {
-    val env = ApplicationExecutionEnvironment.env
-    println(s"${stationData(env).count()} stations")
-    println(s"${tripData(env).count()} trips")
+    tripCsvFiles.foreach(f => println(f.pathAsString))
+//    val env = ApplicationExecutionEnvironment.env
+//    println(s"${stationData(env).count()} stations")
+//    println(s"${tripData(env).count()} trips")
   }
 }
