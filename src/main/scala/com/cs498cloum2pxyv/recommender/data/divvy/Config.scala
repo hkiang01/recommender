@@ -2,6 +2,11 @@ package com.cs498cloum2pxyv.recommender.data.divvy
 
 import java.io.File
 import java.net.URL
+import java.util.Date
+
+import com.cs498cloum2pxyv.recommender.util.Util
+
+import scala.util.{Failure, Success, Try}
 
 object Config {
 
@@ -50,7 +55,7 @@ object Config {
       "gender",
       "birthyear"
   )
-  case class Trip(
+  case class TripRaw(
       trip_id: String,
       starttime: String,
       stoptime: String,
@@ -64,6 +69,38 @@ object Config {
       gender: String,
       birthyear: String
   )
+
+  def format(raw: TripRaw): Trip = {
+    Trip(
+      raw.trip_id,
+      Util.stringWithTimeToDate(raw.starttime),
+      Util.stringWithTimeToDate(raw.stoptime),
+      raw.bikeid,
+      raw.tripduration,
+      raw.from_station_id,
+      raw.from_station_name,
+      raw.to_station_id,
+      raw.to_station_name,
+      raw.usertype,
+      raw.gender,
+      raw.birthyear
+    )
+  }
+
+  case class Trip(
+                   trip_id: String,
+                   starttime: Date,
+                   stoptime: Date,
+                   bikeid: String,
+                   tripduration: String,
+                   from_station_id: String,
+                   from_station_name: String,
+                   to_station_id: String,
+                   to_station_name: String,
+                   usertype: String,
+                   gender: String,
+                   birthyear: String
+                 )
 
   val relativeZipPaths: Seq[String] = urls.map(url => s"src/main/resources/${url.getPath.split("/").last}")
   val absoluteZipPaths: Seq[String] = relativeZipPaths.map(new File(_).getAbsolutePath)

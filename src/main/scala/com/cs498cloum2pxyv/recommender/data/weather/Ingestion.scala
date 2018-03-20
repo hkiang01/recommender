@@ -6,6 +6,7 @@ import java.util.Date
 
 import com.cs498cloum2pxyv.recommender.ApplicationExecutionEnvironment
 import com.cs498cloum2pxyv.recommender.data.weather.Config.NoaaStation
+import com.cs498cloum2pxyv.recommender.util.Util
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
 import org.apache.flink.streaming.api.scala._
 
@@ -32,11 +33,6 @@ object Ingestion {
                                    tmin: String,
                                    tobs: String)
 
-  def stringToDate(str: String): Date = {
-    val sdf = new SimpleDateFormat("MM/dd/yyyy")
-    sdf.parse(str)
-  }
-
   def format(raw: NoaaChicagoDailyTempRaw): NoaaChicagoDailyTemp = {
 
     NoaaChicagoDailyTemp(
@@ -44,7 +40,7 @@ object Ingestion {
       raw.name,
       raw.state,
       raw.country,
-      stringToDate(raw.date),
+      Util.stringToDate(raw.date),
       raw.tmax,
       raw.tmin,
       raw.tobs

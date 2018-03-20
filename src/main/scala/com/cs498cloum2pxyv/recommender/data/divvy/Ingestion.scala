@@ -3,7 +3,7 @@ package com.cs498cloum2pxyv.recommender.data.divvy
 import scala.sys.process._
 import better.files._
 import com.cs498cloum2pxyv.recommender.ApplicationExecutionEnvironment
-import com.cs498cloum2pxyv.recommender.data.divvy.Config.{Trip,Station}
+import com.cs498cloum2pxyv.recommender.data.divvy.Config.{Station, Trip, TripRaw}
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
 import org.apache.flink.streaming.api.scala._
 
@@ -90,14 +90,16 @@ object Ingestion {
   def tripData(env: ExecutionEnvironment): DataSet[Trip] = {
     tripCsvFiles
       .map(f => {
-        env.readCsvFile[Trip](f.pathAsString, pojoFields = Config.tripFields)
+        env.readCsvFile[TripRaw](f.pathAsString, pojoFields = Config.tripFields)
       }).reduce((ds1, ds2) => ds1.union(ds2))
+      .map[Trip](tr => Config.format(tr))
   }
 
   def main(args: Array[String]): Unit = {
-    tripCsvFiles.foreach(f => println(f.pathAsString))
-//    val env = ApplicationExecutionEnvironment.env
+//    tripCsvFiles.foreach(f => println(f.pathAsString))
+    val env = ApplicationExecutionEnvironment.env
 //    println(s"${stationData(env).count()} stations")
 //    println(s"${tripData(env).count()} trips")
+    tripData(env).first(5).print()
   }
 }
