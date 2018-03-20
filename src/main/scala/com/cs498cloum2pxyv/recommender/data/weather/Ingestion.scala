@@ -3,13 +3,14 @@ package com.cs498cloum2pxyv.recommender.data.weather
 import java.io.File
 
 import com.cs498cloum2pxyv.recommender.ApplicationExecutionEnvironment
+import com.cs498cloum2pxyv.recommender.data.weather.Config.NoaaStation
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
 import org.apache.flink.streaming.api.scala._
 
 
 object Ingestion {
 
-  val noaaChicagoDailyTempFields: Array[String] = Array(
+  val fields: Array[String] = Array(
     "station",
     "name",
     "state",
@@ -34,12 +35,23 @@ object Ingestion {
   def data(env: ExecutionEnvironment): DataSet[NoaaChicagoDailyTemp] = {
     env.readCsvFile[NoaaChicagoDailyTemp](
       csvFile.getAbsolutePath,
-      pojoFields = noaaChicagoDailyTempFields)
+      pojoFields = fields)
+  }
+
+  def noaaStationsTxtFile: File = new File("src/main/resources/ghcnd-stations.txt")
+
+  def noaaStationData(env: ExecutionEnvironment): DataSet[NoaaStation] = {
+    env.readTextFile(noaaStationsTxtFile.getAbsolutePath)
+      .map(line => {
+        Config.createNoaaStation(
+          Config.noaaStationFieldsAndIndices.map(tuple => {
+            val end = math.min(tuple._3, line.length)
+            line.substring(tuple._2-1, end).replace("\\w+", "")
+          }))
+      })
   }
 
   def main(args: Array[String]): Unit = {
-    println(csvFile.getAbsolutePath)
-    val env = ApplicationExecutionEnvironment.env
-    println(s"${data(env).count()} temp observations")
+    noaaStationData(ApplicationExecutionEnvironment.env).first(5).print()
   }
 }

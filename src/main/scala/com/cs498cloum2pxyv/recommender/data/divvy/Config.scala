@@ -27,13 +27,13 @@ object Config {
     "online date"
   )
   case class Station(
-      id: String,
-      name: String,
-      latitude: String,
-      longitude: String,
-      dpcapacity: String,
-      landmark: String,
-      online_date: String
+    id: String,
+    name: String,
+    latitude: String,
+    longitude: String,
+    dpcapacity: String,
+    landmark: String,
+    online_date: String
   )
 
   val tripFields: Array[String] = Array(
