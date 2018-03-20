@@ -123,7 +123,15 @@ WMO ID     is the World Meteorological Organization (WMO) number for the
     wmo_id: String
   )
 
-  def createNoaaStation(v: Array[String]): NoaaStation = {
+  private def createNoaaStationFromArr(v: Array[String]): NoaaStation = {
     NoaaStation(v.head, v.apply(1), v.apply(2), v.apply(3), v.apply(4), v.apply(5), v.apply(6), v.apply(7), v.apply(8))
+  }
+
+  def createNoaaStation(line: String): NoaaStation = {
+    createNoaaStationFromArr(
+      noaaStationFieldsAndIndices.map(tuple => {
+        val end = math.min(tuple._3, line.length)
+        line.substring(tuple._2-1, end).replace("\\w+", "")
+      }))
   }
 }

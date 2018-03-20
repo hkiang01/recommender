@@ -1,6 +1,8 @@
 package com.cs498cloum2pxyv.recommender.data.weather
 
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 
 import com.cs498cloum2pxyv.recommender.ApplicationExecutionEnvironment
 import com.cs498cloum2pxyv.recommender.data.weather.Config.NoaaStation
@@ -20,7 +22,7 @@ object Ingestion {
     "tmin",
     "tobs"
   )
-  case class NoaaChicagoDailyTemp(
+  case class NoaaChicagoDailyTempRaw(
                                    station: String,
                                    name: String,
                                    state: String,
@@ -30,25 +32,48 @@ object Ingestion {
                                    tmin: String,
                                    tobs: String)
 
+  def stringToDate(str: String): Date = {
+    val sdf = new SimpleDateFormat("MM/dd/yyyy")
+    sdf.parse(str)
+  }
+
+  def format(raw: NoaaChicagoDailyTempRaw): NoaaChicagoDailyTemp = {
+
+    NoaaChicagoDailyTemp(
+      raw.station,
+      raw.name,
+      raw.state,
+      raw.country,
+      stringToDate(raw.date),
+      raw.tmax,
+      raw.tmin,
+      raw.tobs
+    )
+  }
+
+  case class NoaaChicagoDailyTemp(
+                                   station: String,
+                                   name: String,
+                                   state: String,
+                                   country: String,
+                                   date: Date,
+                                   tmax: String,
+                                   tmin: String,
+                                   tobs: String)
+
   def csvFile: File = new File("src/main/resources/noaa_chicago_daily_temp.csv")
 
   def data(env: ExecutionEnvironment): DataSet[NoaaChicagoDailyTemp] = {
-    env.readCsvFile[NoaaChicagoDailyTemp](
+    env.readCsvFile[NoaaChicagoDailyTempRaw](
       csvFile.getAbsolutePath,
       pojoFields = fields)
+      .map(format(_))
   }
 
   def noaaStationsTxtFile: File = new File("src/main/resources/ghcnd-stations.txt")
 
   def noaaStationData(env: ExecutionEnvironment): DataSet[NoaaStation] = {
-    env.readTextFile(noaaStationsTxtFile.getAbsolutePath)
-      .map(line => {
-        Config.createNoaaStation(
-          Config.noaaStationFieldsAndIndices.map(tuple => {
-            val end = math.min(tuple._3, line.length)
-            line.substring(tuple._2-1, end).replace("\\w+", "")
-          }))
-      })
+    env.readTextFile(noaaStationsTxtFile.getAbsolutePath).map(Config.createNoaaStation(_))
   }
 
   def main(args: Array[String]): Unit = {
