@@ -11,11 +11,12 @@ object CCADataset {
 
   def main(args: Array[String]): Unit = {
 
-//    val temps: DataSet[NoaaChicagoDailyTemp] = weather.Ingestion.data(env)
-//    val stations: DataSet[NoaaStation] = weather.Ingestion.noaaStationData(env)
-//    val joinedWeather: JoinDataSet[NoaaChicagoDailyTemp, NoaaStation] = temps.join(stations).where("station").equalTo("id")
-//    joinedWeather.first(5).print
+    val temps: DataSet[NoaaChicagoDailyTemp] = weather.Ingestion.data(env)
+    val stations: DataSet[NoaaStation] = weather.Ingestion.noaaStationData(env)
 
-    divvy.Ingestion.tripData(env).first(5).print()
+    // three interesting DataSets
+    val joinedWeather: JoinDataSet[NoaaChicagoDailyTemp, NoaaStation] = temps.join(stations).where("station").equalTo("id")
+    val trips = divvy.Ingestion.tripData(env)
+    val divvyStations = divvy.Ingestion.stationData(env)
   }
 }
