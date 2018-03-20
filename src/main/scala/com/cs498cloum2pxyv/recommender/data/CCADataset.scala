@@ -16,6 +16,6 @@ object CCADataset {
 //    val joinedWeather: JoinDataSet[NoaaChicagoDailyTemp, NoaaStation] = temps.join(stations).where("station").equalTo("id")
 //    joinedWeather.first(5).print
 
-    divvy.Ingestion.stationData(env).first(5).print()
+    divvy.Ingestion.tripData(env).first(5).print()
   }
 }

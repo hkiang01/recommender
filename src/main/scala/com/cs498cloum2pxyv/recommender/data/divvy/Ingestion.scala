@@ -91,8 +91,9 @@ object Ingestion {
     tripCsvFiles
       .map(f => {
         env.readCsvFile[TripRaw](f.pathAsString, pojoFields = Config.tripFields)
-      }).reduce((ds1, ds2) => ds1.union(ds2))
-      .map[Trip](tr => Config.format(tr))
+          .map[Trip](Config.format(_))
+      })
+      .reduce((ds1, ds2) => ds1.union(ds2))
   }
 
   def main(args: Array[String]): Unit = {
