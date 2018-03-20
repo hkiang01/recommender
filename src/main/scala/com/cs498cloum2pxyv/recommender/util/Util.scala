@@ -11,28 +11,18 @@ object Util {
     sdf.parse(str)
   }
 
-  val sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm")
+  val sdf = new SimpleDateFormat("MMddyyyy HH:mm")
   def stringWithDashedTimeToDate(str: String): Date = {
     sdf.parse(str)
-  }
-
-  val sdf2 = new SimpleDateFormat("MM/dd/yyyy HH:mm")
-  def stringWithSlashedTimeToDate(str: String): Date = {
-    sdf2.parse(str)
   }
 
   private def defaultDate: Date = new Date()
 
   def stringWithTimeToDate(str: String): Date = {
-    Try(stringWithSlashedTimeToDate(str)) match {
+    Try(stringWithDashedTimeToDate(str.replace("/","").replace("-",""))) match {
       case Success(x) => x
-      case _ => { // this isn't good practice, should be "case Failure(ex)"
-        Try(stringWithDashedTimeToDate(str)) match {
-          case Success(x) => x
-          case _ => { // this isn't good practice, should be "case Failure(ex)"
-            defaultDate
-          }
-        }
+      case Failure(ex) => { // this isn't good practice, should be "case Failure(ex)"
+        defaultDate
       }
     }
   }
