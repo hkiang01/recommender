@@ -41,6 +41,8 @@ object Ingestion {
     * @return
     */
   def csvFiles: Seq[File] = {
+    downloadFiles()
+    unzipFiles()
     Config.absoluteExtractPaths.flatMap(p => {
       val dirs = File(p).list.filter(_.isDirectory).toSeq
       val dirFiles = dirs.flatMap(_.list)

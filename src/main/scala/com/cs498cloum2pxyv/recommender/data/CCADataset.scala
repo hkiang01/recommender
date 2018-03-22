@@ -5,7 +5,7 @@ import java.util.Date
 import com.cs498cloum2pxyv.recommender.ApplicationExecutionEnvironment
 import com.cs498cloum2pxyv.recommender.data.divvy.Config
 import com.cs498cloum2pxyv.recommender.data.weather.Ingestion.NoaaChicagoDailyTemp
-import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment, JoinDataSet}
+import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
 import org.apache.flink.util.Collector
 import org.apache.flink.streaming.api.scala._
 
