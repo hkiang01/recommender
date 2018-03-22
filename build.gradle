@@ -15,4 +15,6 @@ dependencies {
     compile group: 'org.apache.flink', name: 'flink-streaming-scala_2.11', version: '1.4.1'
     compile group: 'org.apache.flink', name: 'flink-clients_2.11', version: '1.4.1'
     compile group: 'com.github.pathikrit', name: 'better-files_2.11', version: '3.4.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
 }

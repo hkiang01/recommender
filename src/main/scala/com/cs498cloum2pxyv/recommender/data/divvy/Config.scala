@@ -73,8 +73,8 @@ object Config {
   def format(raw: TripRaw): Trip = {
     Trip(
       raw.trip_id,
-      Util.stringWithTimeToDate(raw.starttime),
-      Util.stringWithTimeToDate(raw.stoptime),
+      Util.divvyTripTimeStringToDate(raw.starttime),
+      Util.divvyTripTimeStringToDate(raw.stoptime),
       raw.bikeid,
       raw.tripduration,
       raw.from_station_id,

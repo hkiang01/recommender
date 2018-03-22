@@ -4,24 +4,36 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import scala.util.{Failure, Success, Try}
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 object Util {
-  def stringToDate(str: String): Date = {
-    val sdf = new SimpleDateFormat("MM/dd/yyyy")
-    sdf.parse(str)
-  }
-
-  val sdf = new SimpleDateFormat("MMddyyyy HH:mm")
-  def stringWithDashedTimeToDate(str: String): Date = {
-    sdf.parse(str)
-  }
+  private val logger = LogManager.getLogger(this.getClass.getName)
 
   private def defaultDate: Date = new Date()
+  def sdfDivvyDashedDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+  def sdfDivvySlashedDateTimeFormat = new SimpleDateFormat("MM/dd/yy HH:mm:ss")
+  def sdfDivvyDashedDateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
-  def stringWithTimeToDate(str: String): Date = {
-    Try(stringWithDashedTimeToDate(str.replace("/","").replace("-",""))) match {
+  def divvyTripTimeStringToDate(str: String): Date = {
+    Try(sdfDivvyDashedDateTimeFormat.parse(str)) match {
       case Success(x) => x
-      case Failure(ex) => { // this isn't good practice, should be "case Failure(ex)"
+      case Failure(ex) => Try(sdfDivvySlashedDateTimeFormat.parse(str)) match {
+        case Success(x2) => x2
+        case Failure(ex2) => defaultDate
+      }
+    }
+  }
+
+  val sdfNoaaChicagoDailyTempString = new SimpleDateFormat("yyyy-MM-dd")
+  def noaaChicagoDailyTempDateStringToDate(str: String): Date = {
+    if(str.isEmpty) {
+      return defaultDate
+    }
+    Try(sdfNoaaChicagoDailyTempString.parse(str)) match {
+      case Success(x) => x
+      case Failure(ex) => {
+//        logger.error(s"unable to convert $str to date", ex)
         defaultDate
       }
     }

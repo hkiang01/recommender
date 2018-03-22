@@ -5,18 +5,19 @@ import java.time.{LocalDate, Month}
 import org.scalatest.{FlatSpec, Matchers}
 
 class UtilTest extends FlatSpec with Matchers {
-  "A date" should "be formatted from a string" in {
-    val str = "7/24/2017"
-    val date = Util.stringToDate(str)
-    val expected = java.sql.Date.valueOf(LocalDate.of(2017, Month.JULY, 24))
-    date should be (expected)
+  "Dates with slashes and/or dashes" should "be converted to Dates" in {
+    val strSlash = "12/31/2016 23:45:41"
+    val strDash = "2016-12-31 23:45"
+    val dateSlash = Util.divvyTripTimeStringToDate(strSlash)
+    val dateDash = Util.divvyTripTimeStringToDate(strDash)
 
-    val str2 = "07/24/2017"
-    val date2 = Util.stringToDate(str2)
-    date2 should be (expected)
+    val expected = java.sql.Date.valueOf(LocalDate.of(2016, Month.DECEMBER, 31))
   }
 
-  "Slashes and/or dashes" should "be convertable" in {
-    val strSlash = ""
+  "Noaa chicago daily temp dates" should "be converted to Dates" in {
+    val str = "2016-04-05"
+    val date = Util.noaaChicagoDailyTempDateStringToDate(str)
+    val expected = java.sql.Date.valueOf(LocalDate.of(2016, Month.APRIL,5))
+    date should be (expected)
   }
 }

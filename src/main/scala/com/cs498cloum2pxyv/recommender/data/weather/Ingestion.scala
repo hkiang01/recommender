@@ -10,8 +10,18 @@ import com.cs498cloum2pxyv.recommender.util.Util
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
 import org.apache.flink.streaming.api.scala._
 
+import scala.util.{Failure, Success, Try}
+
 
 object Ingestion {
+
+  private def stringToInt(str: String): Int = {
+    if (str.isEmpty) Integer.MIN_VALUE
+    else Try(str.toInt) match {
+      case Success(x) => x
+      case Failure(ex) => Integer.MIN_VALUE
+    }
+  }
 
   val fields: Array[String] = Array(
     "station",
@@ -34,16 +44,15 @@ object Ingestion {
                                    tobs: String)
 
   def format(raw: NoaaChicagoDailyTempRaw): NoaaChicagoDailyTemp = {
-
     NoaaChicagoDailyTemp(
       raw.station,
       raw.name,
       raw.state,
       raw.country,
-      Util.stringToDate(raw.date),
-      raw.tmax,
-      raw.tmin,
-      raw.tobs
+      Util.noaaChicagoDailyTempDateStringToDate(raw.date),
+      stringToInt(raw.tmax),
+      stringToInt(raw.tmin),
+      stringToInt(raw.tobs)
     )
   }
 
@@ -53,17 +62,26 @@ object Ingestion {
                                    state: String,
                                    country: String,
                                    date: Date,
-                                   tmax: String,
-                                   tmin: String,
-                                   tobs: String)
+                                   tmax: Int,
+                                   tmin: Int,
+                                   tobs: Int)
+
+  def isValid(ncdt: NoaaChicagoDailyTemp): Boolean = {
+    ncdt.tmin != Integer.MIN_VALUE &&
+    ncdt.tmax != Integer.MIN_VALUE &&
+    ncdt.tobs != Integer.MIN_VALUE
+  }
 
   def csvFile: File = new File("src/main/resources/noaa_chicago_daily_temp.csv")
 
   def data(env: ExecutionEnvironment): DataSet[NoaaChicagoDailyTemp] = {
     env.readCsvFile[NoaaChicagoDailyTempRaw](
       csvFile.getAbsolutePath,
-      pojoFields = fields)
-      .map(format(_))
+      pojoFields = fields,
+      lenient = true,
+      ignoreFirstLine = true)
+      .map(r => format(r))
+      .filter(r => isValid(r))
   }
 
   def noaaStationsTxtFile: File = new File("src/main/resources/ghcnd-stations.txt")
