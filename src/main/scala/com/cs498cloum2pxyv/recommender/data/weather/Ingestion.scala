@@ -1,11 +1,8 @@
 package com.cs498cloum2pxyv.recommender.data.weather
 
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.cs498cloum2pxyv.recommender.ApplicationExecutionEnvironment
-import com.cs498cloum2pxyv.recommender.data.weather.Config.NoaaStation
 import com.cs498cloum2pxyv.recommender.util.Util
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
 import org.apache.flink.streaming.api.scala._
@@ -82,15 +79,5 @@ object Ingestion {
       ignoreFirstLine = true)
       .map(r => format(r))
       .filter(r => isValid(r))
-  }
-
-  def noaaStationsTxtFile: File = new File("src/main/resources/ghcnd-stations.txt")
-
-  def noaaStationData(env: ExecutionEnvironment): DataSet[NoaaStation] = {
-    env.readTextFile(noaaStationsTxtFile.getAbsolutePath).map(Config.createNoaaStation(_))
-  }
-
-  def main(args: Array[String]): Unit = {
-    noaaStationData(ApplicationExecutionEnvironment.env).first(5).print()
   }
 }
