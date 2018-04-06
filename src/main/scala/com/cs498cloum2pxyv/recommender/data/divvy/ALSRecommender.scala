@@ -9,10 +9,8 @@ import org.apache.flink.streaming.api.scala._
 object ALSRecommender {
   def main(args: Array[String]): Unit = {
     val env = ApplicationExecutionEnvironment.env
-//    val inputDS: DataSet[(Int, Int, Int, Int, Int, Int, Double)] =
-//      env.readCsvFile[(Int, Int, Int, Int, Int, Int, Double)]("ALS/input/train_feature_label.sixfeatures.txt")
     val inputDS: DataSet[(Int, Int, Double)] =
-      env.readCsvFile[(Int, Int,Double)]("ALS/input/train_feature_label.twofeatures.txt")
+      env.readCsvFile[(Int, Int,Double)]("ML/input/train_feature_label.twofeatures.txt")
 
     val als = ALS()
       .setIterations(10)
@@ -25,10 +23,8 @@ object ALSRecommender {
       .add(ALS.Seed, 42L)
 
     als.fit(inputDS, parameters)
-//    val testingDS: DataSet[(Int, Int, Int, Int, Int, Int)] =
-//      env.readCsvFile[(Int, Int, Int, Int, Int, Int)]("ALS/input/test_feature.sixfeatures.txt")
     val testingDS: DataSet[(Int, Int)] =
-      env.readCsvFile[(Int, Int)]("ALS/input/test_feature.twofeatures.txt")
+      env.readCsvFile[(Int, Int)]("ML/input/test_feature.twofeatures.txt")
 
     val predictedRatings = als.predict(testingDS)
     predictedRatings.writeAsCsv("ALS/predicted_output")
