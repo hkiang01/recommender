@@ -20,4 +20,10 @@ class UtilTest extends FlatSpec with Matchers {
     val expected = java.sql.Date.valueOf(LocalDate.of(2016, Month.APRIL,5))
     date should be (expected)
   }
+
+  "Dates" should "have their times set to midnight" in {
+    val str = "12/31/2016 23:45:41"
+    val date = Util.divvyTripTimeStringToDate(str)
+    Util.removeTime(date).toString.substring(11,19) should equal("00:00:00")
+  }
 }
