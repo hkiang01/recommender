@@ -1,7 +1,7 @@
 package com.cs498cloum2pxyv.recommender.util
 
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.{Calendar, Date}
 
 import scala.util.{Failure, Success, Try}
 import org.apache.logging.log4j.LogManager
@@ -25,6 +25,16 @@ object Util {
     }
   }
 
+  def removeTime(date: Date): Date = {
+    val cal = Calendar.getInstance()
+    cal.setTime(date)
+    cal.set(Calendar.HOUR_OF_DAY, 0)
+    cal.set(Calendar.MINUTE, 0)
+    cal.set(Calendar.SECOND, 0)
+    cal.set(Calendar.MILLISECOND, 0)
+    cal.getTime
+  }
+
   val sdfNoaaChicagoDailyTempString = new SimpleDateFormat("yyyy-MM-dd")
   def noaaChicagoDailyTempDateStringToDate(str: String): Date = {
     if(str.isEmpty) {
@@ -33,7 +43,7 @@ object Util {
     Try(sdfNoaaChicagoDailyTempString.parse(str)) match {
       case Success(x) => x
       case Failure(ex) => {
-//        logger.error(s"unable to convert $str to date", ex)
+        //        logger.error(s"unable to convert $str to date", ex)
         defaultDate
       }
     }
