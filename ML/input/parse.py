@@ -93,6 +93,8 @@ for i, file in enumerate(os.listdir(dataset_base_dir)):
         ','+avg_min_temp+
         ','+avg_max_temp+
         ','+avg_obs_temp)
+        if '' in features.split(','):
+            continue
         label = s[7]
         features_file.write(features + "\n")
         labels_file.write(label + "\n")
