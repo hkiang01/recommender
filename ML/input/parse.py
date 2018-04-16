@@ -56,35 +56,32 @@ def get_user_type(user_type):
     return user_type_switch.get(user_type, '0')
 
 dataset_base_dir = "/home/harry/projects/school/recommender/ML/cca_dataset/"
+features_file = open('ML/data_features.csv', 'w')
+labels_file = open('ML/data_labels.csv', 'w')
 for i, file in enumerate(os.listdir(dataset_base_dir)):
-    if i > 0:
-        continue
     file_name = dataset_base_dir + file
     print(file_name)
     fr = open(file_name, 'r')
     for j, line in enumerate(fr):
-        if j>5:
-            continue
-        print(str(i) + " " + str(j) + " "  + line)
         s = line.split(",")
         month = get_start_month(s[1])
-        print("month: " + month)
         hour = get_start_hour(s[1])
-        print("hour: " + hour)
         from_station_id=s[5]
-        print("from station id: " + from_station_id)
         gender=get_gender_num(s[10])
-        print("gender: " + gender)
         birthyear=get_birthyear(s[11])
-        print("birthyear: " + birthyear)
         usertype=get_user_type(s[9])
-        print("usertype: " + usertype)
-        avg_max_temp=str(round(float(s[12])))
-        print("avg max temp: " + avg_max_temp)
-        avg_min_temp=str(round(float(s[13])))
-        print("avg min temp: " + avg_min_temp)
-        avg_obs_temp=str(round(float(s[14])))
-        print("avg obs temp: " + avg_obs_temp)
+        if(s[12].strip()=='' or s[12].strip()==None):
+            avg_max_temp = ''
+        else:
+            avg_max_temp=str(round(float(s[12].strip())))
+        if(s[13].strip()=='' or s[13].strip()==None):
+            avg_min_temp = ''
+        else:
+            avg_min_temp=str(round(float(s[13].strip())))
+        if(s[14].strip()=='' or s[14].strip()==None):
+            avg_obs_temp=''
+        else:
+            avg_obs_temp=str(round(float(s[14].strip())))
         features = (month+
         ','+hour+
         ','+from_station_id+
@@ -95,9 +92,12 @@ for i, file in enumerate(os.listdir(dataset_base_dir)):
         ','+avg_max_temp+
         ','+avg_obs_temp)
         label = s[7]
-        print(features)
-        print(label)
+        features_file.write(features + "\n")
+        labels_file.write(label + "\n")
     fr.close()
+
+features_file.close()
+labels_file.close()
 
 # features = list()
 # labels = list()
