@@ -1,21 +1,26 @@
 import numpy as np
 from sklearn import svm
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 INPUTFILE_PROCESSED=''
 
 def main():
-    train = np.loadtxt('train_feature_label.small.txt', delimiter=',')
-    train_label = train[:,0]
-    train_features = train[:,[1,2,3,4,5,6]]
-    # print train_features.shape
+
+    features = pd.read_csv('ML/data_features.csv')
+    labels = pd.read_csv('ML/data_labels.csv')
+
+    x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size=0.2)
+    print(x_train.shape, y_train.shape)
+    print(x_test.shape, y_test.shape)
 
     clf = svm.SVC()
-    clf.fit(train_features, train_label)
+    clf.fit(x_train, y_train)
 
-    test_features = np.loadtxt('test_feature.small.txt', delimiter=',')
-    # print test_features.shape
-    test_predict = clf.predict(test_features)
-    print test_predict
+    predictions = clf.predict(x_test)
+    score = accuracy_score(y_test, predictions)
+    print(score)
 
 if __name__ == "__main__":
     main()
