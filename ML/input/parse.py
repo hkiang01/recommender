@@ -10,12 +10,28 @@ def get_random_index_set(size):
     return index
 
 def get_start_month(start_time):
-    s = start_time.split('/')
-    month = s[0]
-    return month
+    month_switch = {
+        'Jan': '1',
+        'Feb': '2',
+        'Mar': '3',
+        'Apr': '4',
+        'May': '5',
+        'Jun': '6',
+        'Jul': '7',
+        'Aug': '8',
+        'Sep': '9',
+        'Oct': '10',
+        'Nov': '11',
+        'Dec': '12'
+    }
+
+    s = start_time.split(' ')
+    return month_switch.get(s[1], '0')
 
 def get_start_hour(start_time):
-    return re.sub('^.* ', '', re.sub(':.*', '', start_time))
+    raw = re.sub('^.* ', '', re.sub(':.*', '', start_time))
+    formatted = str(int(raw))
+    return formatted
 
 def get_gender_num(gender):
     if gender.lower() == 'male':
@@ -31,14 +47,57 @@ def get_birthyear(birthyear):
     else:
         return birthyear
 
-def get_tripduration_min(tripduration):
-    return str(int(tripduration)/60)
+user_type_switch = {
+    'Customer': '1',
+    'Subscriber': '2'
+}
+
+def get_user_type(user_type):
+    return user_type_switch.get(user_type, '0')
 
 dataset_base_dir = "/home/harry/projects/school/recommender/ML/cca_dataset/"
-for file in os.listdir(dataset_base_dir):
+for i, file in enumerate(os.listdir(dataset_base_dir)):
+    if i > 0:
+        continue
     file_name = dataset_base_dir + file
     print(file_name)
-    
+    fr = open(file_name, 'r')
+    for j, line in enumerate(fr):
+        if j>5:
+            continue
+        print(str(i) + " " + str(j) + " "  + line)
+        s = line.split(",")
+        month = get_start_month(s[1])
+        print("month: " + month)
+        hour = get_start_hour(s[1])
+        print("hour: " + hour)
+        from_station_id=s[5]
+        print("from station id: " + from_station_id)
+        gender=get_gender_num(s[10])
+        print("gender: " + gender)
+        birthyear=get_birthyear(s[11])
+        print("birthyear: " + birthyear)
+        usertype=get_user_type(s[9])
+        print("usertype: " + usertype)
+        avg_max_temp=str(round(float(s[12])))
+        print("avg max temp: " + avg_max_temp)
+        avg_min_temp=str(round(float(s[13])))
+        print("avg min temp: " + avg_min_temp)
+        avg_obs_temp=str(round(float(s[14])))
+        print("avg obs temp: " + avg_obs_temp)
+        features = (month+
+        ','+hour+
+        ','+from_station_id+
+        ','+gender+
+        ','+birthyear+
+        ','+usertype+
+        ','+avg_min_temp+
+        ','+avg_max_temp+
+        ','+avg_obs_temp)
+        label = s[7]
+        print(features)
+        print(label)
+    fr.close()
 
 # features = list()
 # labels = list()
