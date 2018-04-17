@@ -6,6 +6,7 @@ from scipy.stats import itemfreq
 
 def train_and_predict(clf, x_train, x_test, y_train, y_test):
     clf = clf.fit(x_train, y_train)
+    # todo: use predict_proba to judge top k score
     predictions = clf.predict(x_test)
     score = accuracy_score(y_test, predictions)
     return score
@@ -60,6 +61,8 @@ def main():
     x_test = x_test.drop([6,7,8],axis=1)
     run_through_models(x_train, x_test, y_train, y_test)
     print("END WITHOUT WEATHER")  
+
+
 
 if __name__ == "__main__":
     main()
