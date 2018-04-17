@@ -1,11 +1,7 @@
-import numpy as np
-from sklearn import svm, tree, neighbors, datasets, ensemble
+from sklearn import svm, tree, neighbors, ensemble
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-import pickle
-import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
 from scipy.stats import itemfreq
 
 def train_and_predict(clf, x_train, x_test, y_train, y_test):
