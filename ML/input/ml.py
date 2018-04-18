@@ -4,57 +4,74 @@ from sklearn.model_selection import train_test_split
 from scipy.stats import itemfreq
 import numpy as np
 
-
-def train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, k):
-    """Calculates top-k accuracy of a clf model
-
+def accuracy_top_k(predictions_proba, labels, classes, k):
+    """Calculates top-k accuracy.
     Top-k accuracy means that any of k highest probability answers must match the expected answer.
 
     For example, consider the following probabilities for a prediction in descending order:
 
-    'A': 0.50,
-    'B': 0.40,
-    'C': 0.35,
+    'class_0': 0.50,
+    'class_1': 0.40,
+    'class_2': 0.35,
     ...
 
-    If the expected answer is 'B' and k=1, the prediction is wrong.
-    If the expected answer is 'B' and k=2, the prediction is correct.
+    If the expected answer is 'class_1' and k=1, the prediction is wrong.
+    If the expected answer is 'class_1' and k=2, the prediction is correct.
+
+    Example
+    -------
+    from sklearn import tree
+    clf = clf.fit(x_train, y_train)
+    classes = clf.classes_
+    predictions_proba = clf.predict_proba(x_test)
+    labels = y_test.values.reshape(len(y_test))
+    score = accuracy_top_k(predictions_proba, labels, classes, k)
 
     Parameters
-    ----------
-    clf : (int): A sklearn estimator instance.
-    x_train : (pandas.DataFrame): The training features.
-    x_test : (pandas.DataFrame): The testing features.
-    y_train : (pandas.DataFrame): The training labels.
-    y_test : (pandas.DataFrame): The testing labels.
-
+    -------
+    predictions_proba : (ndarray) : 2D array containing data of type `float`, the probabilities of each class in classes.
+                              For example, if predictions_proba[row][i] = 0.05,
+                              and the value of the actual predictions_proba is classes[i],
+                              then there is a 0.05 probability that the prediction is classes[i].
+                              The number of columns of predictions_proba must be the same as the size of labels.
+    labels : (ndarray): 1D array containing data, the expected predictions. This size of
+                        labels must be the same as the number of predictions.
+    classes : (ndarray): 1D array containing list of classes whose type matches that of labels.
+                         These are the possible prediction values.
+                         The size of classes should correspond to the number of columns of predictions_proba.
+    k : (int) : The top number of predictions to preserve in descending order of probability.
     Returns
     -------
-    float : The top-k accuracy, ranging from 0 to 1
+    float : The top-k accuracy, ranging from 0.0 to 1.0
     """
-    clf = clf.fit(x_train, y_train)
-    predictions = clf.predict_proba(x_test)
-    labels = y_test.values.reshape(len(predictions))
-
-    ordered_indices_ascending = np.argsort(predictions, axis=1)
+    ordered_indices_ascending = np.argsort(predictions_proba, axis=1)
     ordered_indices_descending = np.flip(ordered_indices_ascending,axis=1)
     top_k_indices = ordered_indices_descending[:,:k]
 
     # for each row, for each index, get corresponding class such that each row has the top k classes in a list
-    top_k_classes = list(map(lambda row: list(map(lambda index: clf.classes_[index], row)), top_k_indices))
+    top_k_classes = list(map(lambda row: list(map(lambda i: classes[i], row)), top_k_indices))
 
     # for each row, if the label is contained within the top k classes, 1, else 0
-    individual_accuracies = map(lambda i: 1 if labels[i] in top_k_classes[i] else 0, range(0,len(predictions)))
-    return sum(individual_accuracies) / len(predictions)
+    individual_accuracies = map(lambda row: 1 if labels[row] in top_k_classes[row] else 0, range(0,len(predictions_proba)-1))
+    return sum(individual_accuracies) / len(predictions_proba)
 
-def train_and_predict(clf, x_train, x_test, y_train, y_test):
-    return train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, 1)
+def train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, k):
+    clf = clf.fit(x_train, y_train)
+    classes = clf.classes_
+    predictions_proba = clf.predict_proba(x_test)
+    labels = y_test.values.reshape(len(y_test))
+    score = accuracy_top_k(predictions_proba, labels, classes, k)
+    return score
 
 def run_through_models(x_train, x_test, y_train, y_test):
     print(x_train.shape, y_train.shape)
     print(x_test.shape, y_test.shape)
     item_freq = itemfreq(y_test)
     print(f"there are {len(item_freq)} unique classes in the test set")
+
+    clf = tree.DecisionTreeClassifier()
+    score = train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, 5)
+    print(f"model: decision tree, score: {score}")
 
     # takes a LONG time
     # clf = svm.SVC()
@@ -71,11 +88,6 @@ def run_through_models(x_train, x_test, y_train, y_test):
     #         clf = neighbors.KNeighborsClassifier(n_neighbors,weights)
     #         score = train_and_predict(clf, x_train, x_test, y_train, y_test)
     #         print(f"model: knn, weights: {weights}, n_neighbors: {n_neighbors}, score: {score}")
-
-    # seems to perform the best
-    clf = tree.DecisionTreeClassifier()
-    score = train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, 5)
-    print(f"model: decision tree, score: {score}")
 
 def main():
 
