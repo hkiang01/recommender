@@ -3,7 +3,8 @@ package com.cs498cloum2pxyv.recommender.data.divvy
 import scala.sys.process._
 import better.files._
 import com.cs498cloum2pxyv.recommender.ApplicationExecutionEnvironment
-import com.cs498cloum2pxyv.recommender.data.divvy.Config.{Trip,Station}
+import com.cs498cloum2pxyv.recommender.data.divvy.Config.{Station, Trip, TripRaw}
+import com.cs498cloum2pxyv.recommender.util.Util
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
 import org.apache.flink.streaming.api.scala._
 
@@ -32,8 +33,8 @@ object Ingestion {
       .map((p: (String, String)) => {(File(p._1), File(p._2))})
       .filter((p: (File, File)) => !p._2.exists)
       .foreach((p: (File, File)) => {
-      p._1.unzipTo(destination = p._2)
-    })
+        p._1.unzipTo(destination = p._2)
+      })
   }
 
   /**
@@ -41,6 +42,8 @@ object Ingestion {
     * @return
     */
   def csvFiles: Seq[File] = {
+    downloadFiles()
+    unzipFiles()
     Config.absoluteExtractPaths.flatMap(p => {
       val dirs = File(p).list.filter(_.isDirectory).toSeq
       val dirFiles = dirs.flatMap(_.list)
@@ -90,15 +93,38 @@ object Ingestion {
   def tripData(env: ExecutionEnvironment): DataSet[Trip] = {
     tripCsvFiles
       .map(f => {
-        env.readCsvFile[Trip](f.pathAsString, pojoFields = Config.tripFields)
-      }).reduce((ds1, ds2) => ds1.union(ds2))
+        env.readCsvFile[TripRaw](f.pathAsString, pojoFields = Config.tripFields)
+          .map[Trip](Config.format(_))
+      })
+      .reduce((ds1, ds2) => ds1.union(ds2))
+  }
+
+  /**
+    * Transforms times to midnight
+    * @param env
+    * @return
+    */
+  def tripsWithStartTimesAtMidnight(env: ExecutionEnvironment): DataSet[Trip] = {
+    tripData(env).map(trip => {
+      Trip(trip.trip_id,
+        Util.removeTime(trip.starttime),
+        trip.stoptime,
+        trip.bikeid,
+        trip.tripduration,
+        trip.from_station_id,
+        trip.from_station_name,
+        trip.to_station_id,
+        trip.to_station_name,
+        trip.usertype,
+        trip.gender,
+        trip.birthyear)
+    })
   }
 
   def main(args: Array[String]): Unit = {
     downloadFiles()
     unzipFiles()
     val env = ApplicationExecutionEnvironment.env
-    println(s"${stationData(env).count()} stations")
-    println(s"${tripData(env).count()} trips")
+    tripData(env).first(5).print()
   }
 }
