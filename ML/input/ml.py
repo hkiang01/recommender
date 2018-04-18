@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from scipy.stats import itemfreq
 import numpy as np
+from sklearn.externals import joblib
 
 def accuracy_top_k(predictions_proba, labels, classes, k):
     """Calculates top-k accuracy.
@@ -56,22 +57,23 @@ def accuracy_top_k(predictions_proba, labels, classes, k):
     individual_accuracies = map(lambda row: 1 if labels[row] in top_k_classes[row] else 0, range(0,len(predictions_proba)))
     return sum(individual_accuracies) / len(predictions_proba)
 
-def train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, k):
+def train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, k, description):
     y_train = np.array(y_train).reshape(len(y_train),)
     clf = clf.fit(x_train, y_train)
+    joblib.dump(clf, description + '.pkl', compress=3)
     classes = clf.classes_
     predictions_proba = clf.predict_proba(x_test)
     labels = y_test.values.reshape(len(y_test))
     score = accuracy_top_k(predictions_proba, labels, classes, k)
     return score
 
-def run_through_models(x_train, x_test, y_train, y_test, models, k):
+def run_through_models(x_train, x_test, y_train, y_test, models, k, description):
     print("train: ", x_train.shape, y_train.shape)
     print("test: ", x_test.shape, y_test.shape)
     print(f"there are {len(itemfreq(y_test))} unique classes in the test set")
 
     for description, model in models:
-        score = train_and_predict_top_k(model, x_train, x_test, y_train, y_test, k)
+        score = train_and_predict_top_k(model, x_train, x_test, y_train, y_test, k, description)
         print(f"model: {description}, top-{k} score: {score}")
 
 def main():
@@ -87,14 +89,14 @@ def main():
     print("BEGIN ALL FEATURES")
     x_large, x_small, y_large, y_small = train_test_split(features, labels, test_size=0.9)
     x_train, x_test, y_train, y_test = train_test_split(x_small, y_small, test_size=0.2)
-    run_through_models(x_train, x_test, y_train, y_test, models, 5)
+    run_through_models(x_train, x_test, y_train, y_test, models, 5, models[0])
     print("END ALL FEATURES\n")
 
     # sans weather
     print("BEGIN WITHOUT WEATHER")
     x_train = x_train.drop([6,7,8],axis=1)
     x_test = x_test.drop([6,7,8],axis=1)
-    run_through_models(x_train, x_test, y_train, y_test, models, 5)
+    run_through_models(x_train, x_test, y_train, y_test, models, 5, models[0])
     print("END WITHOUT WEATHER")  
 
 if __name__ == "__main__":
