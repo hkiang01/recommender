@@ -1,35 +1,54 @@
 from sklearn import svm, tree, neighbors, ensemble
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 from scipy.stats import itemfreq
 import numpy as np
 
+
 def train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, k):
+    """Calculates top-k accuracy of a clf model
+
+    Top-k accuracy means that any of k highest probability answers must match the expected answer.
+
+    For example, consider the following probabilities for a prediction in descending order:
+
+    'A': 0.50,
+    'B': 0.40,
+    'C': 0.35,
+    ...
+
+    If the expected answer is 'B' and k=1, the prediction is wrong.
+    If the expected answer is 'B' and k=2, the prediction is correct.
+
+    Parameters
+    ----------
+    clf : (int): A sklearn estimator instance.
+    x_train : (pandas.DataFrame): The training features.
+    x_test : (pandas.DataFrame): The testing features.
+    y_train : (pandas.DataFrame): The training labels.
+    y_test : (pandas.DataFrame): The testing labels.
+
+    Returns
+    -------
+    float : The top-k accuracy, ranging from 0 to 1
+    """
     clf = clf.fit(x_train, y_train)
-    classes = clf.classes_
     predictions = clf.predict_proba(x_test)
+    labels = y_test.values.reshape(len(predictions))
 
     ordered_indices_ascending = np.argsort(predictions, axis=1)
     ordered_indices_descending = np.flip(ordered_indices_ascending,axis=1)
     top_k_indices = ordered_indices_descending[:,:k]
 
-    labels = y_test.values.reshape(len(predictions))
-    top_k_classes = list(map(lambda row: list(map(lambda index: classes[index], row)), top_k_indices))
-    
-    num_correct = 0
-    for i in range(0,len(predictions)):
-        if labels[i] in top_k_classes[i]:
-            num_correct += 1
-    
-    return num_correct / len(predictions)
+    # for each row, for each index, get corresponding class such that each row has the top k classes in a list
+    top_k_classes = list(map(lambda row: list(map(lambda index: clf.classes_[index], row)), top_k_indices))
+
+    # for each row, if the label is contained within the top k classes, 1, else 0
+    individual_accuracies = map(lambda i: 1 if labels[i] in top_k_classes[i] else 0, range(0,len(predictions)))
+    return sum(individual_accuracies) / len(predictions)
 
 def train_and_predict(clf, x_train, x_test, y_train, y_test):
-    clf = clf.fit(x_train, y_train)
-    # todo: use predict_proba to judge top k score
-    predictions = clf.predict(x_test)
-    score = accuracy_score(y_test, predictions)
-    return score
+    return train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, 1)
 
 def run_through_models(x_train, x_test, y_train, y_test):
     print(x_train.shape, y_train.shape)
@@ -55,7 +74,7 @@ def run_through_models(x_train, x_test, y_train, y_test):
 
     # seems to perform the best
     clf = tree.DecisionTreeClassifier()
-    score = train_and_predict(clf, x_train, x_test, y_train, y_test)
+    score = train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, 5)
     print(f"model: decision tree, score: {score}")
 
 def main():
