@@ -3,6 +3,26 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from scipy.stats import itemfreq
+import numpy as np
+
+def train_and_predict_top_k(clf, x_train, x_test, y_train, y_test, k):
+    clf = clf.fit(x_train, y_train)
+    classes = clf.classes_
+    predictions = clf.predict_proba(x_test)
+
+    ordered_indices_ascending = np.argsort(predictions, axis=1)
+    ordered_indices_descending = np.flip(ordered_indices_ascending,axis=1)
+    top_k_indices = ordered_indices_descending[:,:k]
+
+    labels = y_test.values.reshape(len(predictions))
+    top_k_classes = list(map(lambda row: list(map(lambda index: classes[index], row)), top_k_indices))
+    
+    num_correct = 0
+    for i in range(0,len(predictions)):
+        if labels[i] in top_k_classes[i]:
+            num_correct += 1
+    
+    return num_correct / len(predictions)
 
 def train_and_predict(clf, x_train, x_test, y_train, y_test):
     clf = clf.fit(x_train, y_train)
@@ -15,7 +35,6 @@ def run_through_models(x_train, x_test, y_train, y_test):
     print(x_train.shape, y_train.shape)
     print(x_test.shape, y_test.shape)
     item_freq = itemfreq(y_test)
-    print(item_freq)
     print(f"there are {len(item_freq)} unique classes in the test set")
 
     # takes a LONG time
