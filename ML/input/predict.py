@@ -17,13 +17,18 @@ def get_top_k_classes(predictions_proba, classes,k):
 def main(argv):
     model_path = 'decision tree classifier.pkl'
     features = pd.read_csv('ML/data_features.csv', header=None)
+    stations = pd.read_csv('ML/stations.csv', header=None)
+    stations_dict = stations.to_dict(orient='index')
+    print(stations_dict)
     clf = joblib.load(model_path)
 
     for line in features.values:
         features = [line[:6]] # clf expects a 2D array
         predictions_probs = clf.predict_proba(features)
         recommendations = get_top_k_classes(predictions_probs, clf.classes_,5)[0]
-        recommendations_string = np.array_str(np.array(recommendations))
+        print(recommendations)
+        recommended_stations = list(map(lambda station_id: stations_dict[station_id][1], recommendations))
+        recommendations_string = np.array_str(np.array(recommended_stations))
         line_str = np.array_str(line)
         sys.stdout.write(line_str+'\t'+recommendations_string+'\n')
 if __name__ == "__main__":
