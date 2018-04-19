@@ -81,16 +81,17 @@ def main():
     labels = pd.read_csv('ML/data_labels.csv', header=None)
     models = [
         ("decision tree classifier", tree.DecisionTreeClassifier()),
-        ("random forest classifier", ensemble.RandomForestClassifier()),
-        ("knn classifier", neighbors.KNeighborsClassifier())
+        # ("random forest classifier", ensemble.RandomForestClassifier()),
+        # ("knn classifier", neighbors.KNeighborsClassifier())
     ]
 
-    # with all features
-    print("BEGIN ALL FEATURES")
     x_large, x_small, y_large, y_small = train_test_split(features, labels, test_size=0.9)
     x_train, x_test, y_train, y_test = train_test_split(x_small, y_small, test_size=0.2)
-    run_through_models(x_train, x_test, y_train, y_test, models, 5, models[0])
-    print("END ALL FEATURES\n")
+
+    # with all features
+    # print("BEGIN ALL FEATURES")
+    # run_through_models(x_train, x_test, y_train, y_test, models, 5, models[0])
+    # print("END ALL FEATURES\n")
 
     # sans weather
     print("BEGIN WITHOUT WEATHER")
