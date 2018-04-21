@@ -47,3 +47,8 @@ gradle-app.setting
 # gradle/wrapper/gradle-wrapper.properties
 src/main/resources/Divvy_*
 !src/main/resources/.gitkeep
+
+**/cca_dataset/
+*.csv
+
+.vscode/
