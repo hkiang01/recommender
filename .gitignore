@@ -46,9 +46,9 @@ gradle-app.setting
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
 src/main/resources/Divvy_*
-!src/main/resources/.gitkeep
 
 **/cca_dataset/
 *.csv
+!src/main/resources/noaa_chicago_daily_temp.csv
 
 .vscode/
