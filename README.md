@@ -1,3 +1,3 @@
 # recommender
 
-Paper under construction: https://www.overleaf.com/15099733jzvctdgnhzcv#/57177725/
+See [developing-bike-sharing.pdf](developing-bike-sharing.pdf)
